@@ -7,15 +7,19 @@
 
 #include "DataStructures.h"
 
+
 using namespace Eigen;
+
 using namespace std;
+
+using namespace pcl;
 
 class LidarPlaneExtractor {
 
 protected:
 
     /* pointer to the accumulated point cloud contained in one scan */
-    Vector3d* point_cloud = nullptr;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud;
 
     vector<vector<size_t>> grid_cell = {};
 
@@ -32,7 +36,7 @@ protected:
 
     ~LidarPlaneExtractor() = default;
 
-    explicit LidarPlaneExtractor( Vector3d* point_cloud );
+    explicit LidarPlaneExtractor(pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud );
 
     void putPointsInCells();
 

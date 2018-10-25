@@ -8,7 +8,7 @@
 
 using namespace std;
 
-LidarPlaneExtractor::LidarPlaneExtractor(Vector3d * accumulated_point_cloud)
+LidarPlaneExtractor::LidarPlaneExtractor(pcl::PointCloud<pcl::PointXYZ>::Ptr accumulated_point_cloud)
 {
     cout << "Constructor of LidarPlaneExtractor called." << endl;
 
@@ -33,8 +33,8 @@ void LidarPlaneExtractor::putPointsInCells() {
 
     for( size_t i = 0; i < NUM_POINTS_PER_SCAN; i++ )
     {
-        auto x = point_cloud[i][0];
-        auto y = point_cloud[i][1];
+        auto x = point_cloud->points[i].x;
+        auto y = point_cloud->points[i].y;
         if( ( x < -MAX_X_Y_RANGE_METERS && x > MAX_X_Y_RANGE_METERS )
             ||
             ( y < -MAX_X_Y_RANGE_METERS && y > MAX_X_Y_RANGE_METERS ) )
@@ -67,7 +67,7 @@ float LidarPlaneExtractor::findGroundHeight(const vector<size_t> &cell) {
     float min_ground_height = 100.f;
     for( const auto point_index : cell )
     {
-        auto z = point_cloud[point_index][2];
+        auto z = point_cloud->points[point_index].z;
         if( min_ground_height > z )
         {
             min_ground_height = z;
@@ -88,7 +88,7 @@ void LidarPlaneExtractor::labelGroundAndNonGroundPoints() {
         auto ground_height = ground_height_of_each_cell[i];
         for( auto & point_index : grid_cell[i] )
         {
-            if( point_cloud[point_index][2] > ground_height + GROUND_REGION_HEIGHT )
+            if( point_cloud->points[point_index].z > ground_height + GROUND_REGION_HEIGHT )
             {
                 labels[point_index] = PointTypes::NON_GROUND;
             }

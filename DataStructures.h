@@ -5,7 +5,13 @@
 #ifndef INC_16822_PROJECT_DATASTRUCTURES_H
 #define INC_16822_PROJECT_DATASTRUCTURES_H
 
+// Eigen
 #include "Eigen/Dense"
+
+// Point Cloud Library
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+
 
 using namespace std;
 
@@ -28,14 +34,6 @@ static constexpr size_t NUM_POINTS_PER_SCAN = 64 * 3480;
 static constexpr float MAX_X_Y_RANGE_METERS = 20.f;
 
 static constexpr float CELL_RESOLUTION_METERS = .10f;
-
-struct LidarPointXYZI
-{
-    float x;
-    float y;
-    float z;
-    float i;
-};
 
 enum class PointTypes
 {
