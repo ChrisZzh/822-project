@@ -77,11 +77,16 @@ void print_cloud_rgb( const PointCloud<PointXYZRGB>::Ptr &rgb_cloud_ptr )
 
 int main( int argc, char** argv ) {
 
+    std::clock_t start;
+    double duration;
+
     PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ>);
 
     PointCloud<PointXYZRGB>::Ptr cloud_colored (new PointCloud<PointXYZRGB>);
 
-    if( !load_point_cloud( "test.pcd", cloud ) )
+    start = std::clock();
+
+    if( !load_point_cloud( "../data/scans/1528404295151414871.pcd", cloud ) )
     {
         return -1;
     };
@@ -90,7 +95,10 @@ int main( int argc, char** argv ) {
 
     plane_extraction( cloud_colored );
 
-    print_cloud_rgb( cloud_colored );
+    duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+
+    cout << "Loading and processing one scan consumes: " << duration << " secs." << endl;
+//    print_cloud_rgb( cloud_colored );
 
     visualization::PCLVisualizer visualizer( "Visualizer" );
     init_visualizer( visualizer, cloud_colored );

@@ -51,7 +51,12 @@ void LidarPlaneExtractor::putPointsInCells() {
 
 size_t LidarPlaneExtractor::findIndex( double coordinate ) const {
     coordinate += MAX_X_Y_RANGE_METERS;
-    return static_cast<size_t>( floor(coordinate / CELL_RESOLUTION_METERS ) );
+    auto new_coordinate = floor(coordinate / CELL_RESOLUTION_METERS );
+    if (coordinate < 0.f) {
+        cout << "y < 0: " << coordinate << endl;
+    }
+    assert(new_coordinate >= 0.f);
+    return static_cast<size_t>( new_coordinate );
 }
 
 void LidarPlaneExtractor::find_ground_plane_in_each_cell() {
@@ -66,17 +71,19 @@ void LidarPlaneExtractor::find_ground_plane_in_each_cell() {
 
 float LidarPlaneExtractor::findGroundHeight(const vector<size_t> &cell) {
     float min_ground_height = 100.f;
+    bool found = false;
     for( const auto point_index : cell )
     {
         auto z = point_cloud->points[point_index].z;
         if( min_ground_height > z )
         {
             min_ground_height = z;
+            found = true;
         }
     }
-    if( fabs( min_ground_height - 100.f ) <= EPSILON )
+    if( !found )
     {
-        cerr << "minumum ground height = 100 meters" << endl;
+        cerr << "LidarPlaneExtractor::findGroundHeight: not found." << endl;
     }
     return min_ground_height;
 }

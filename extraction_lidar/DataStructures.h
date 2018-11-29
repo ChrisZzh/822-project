@@ -31,7 +31,7 @@ static constexpr float GROUND_REGION_HEIGHT = 0.1f;
 
 //static constexpr size_t NUM_POINTS_PER_SCAN = 64 * 3480;
 
-static constexpr float MAX_X_Y_RANGE_METERS = 5.0f;
+static constexpr float MAX_X_Y_RANGE_METERS = 15.0f;
 
 static constexpr float CELL_RESOLUTION_METERS = 1.0f;
 
