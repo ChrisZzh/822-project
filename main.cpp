@@ -1,8 +1,10 @@
 // c++ standard libraries
 #include <iostream>
+#include <string>
 
 // project helpers
 #include "DataStructures.h"
+#include "LidarPlaneExtractor.h"
 
 // Point Cloud Library (PCL) supports
 #include <pcl/io/pcd_io.h>
@@ -14,50 +16,90 @@ using namespace pcl;
 
 using namespace std;
 
-int main( int argc, char** argv ) {
-
-    PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ>);
-    PointCloud<PointXYZRGBA>::Ptr cloud_colored (new PointCloud<PointXYZRGBA>);
-    visualization::PCLVisualizer visualizer ("Backend visualizer");
-    visualization::CloudViewer viewer ("Simple Cloud Viewer");
-
-    if (io::loadPCDFile<PointXYZ> ("test.pcd", *cloud) == -1) //* load the file
+bool load_point_cloud( const string & filename, const PointCloud<PointXYZ>::Ptr &point_cloud_pointer )
+{
+    if (io::loadPCDFile<PointXYZ> (filename, *point_cloud_pointer) == -1) //* load the file
     {
         PCL_ERROR ("Couldn't read file test_pcd.pcd \n");
-        return (-1);
+        return false;
     }
 
     std::cout << "Loaded "
-              << cloud->width * cloud->height
+              << point_cloud_pointer->width * point_cloud_pointer->height
               << " data points from test_pcd.pcd "
               << std::endl;
 
-    visualizer.addPointCloud( cloud_colored, "cloud" );
-    cloud_colored->points.resize( cloud->points.size() );
-    for( size_t i = 0; i < cloud->points.size(); i++ )
+    return true;
+}
+
+void copy_point_cloud_xyz_to_rgbd( const PointCloud<PointXYZ>::Ptr &point_cloud_ptr, const PointCloud<PointXYZRGB>::Ptr &point_cloud_rgb_ptr )
+{
+    point_cloud_rgb_ptr->points.resize( point_cloud_ptr->points.size() );
+    for( size_t i = 0; i < point_cloud_ptr->points.size(); i++ )
     {
-        cloud_colored->points[i].x = cloud->points[i].x;
-        cloud_colored->points[i].y = cloud->points[i].y;
-        cloud_colored->points[i].z = cloud->points[i].z;
-        cloud_colored->points[i].r = 255;
-        cloud_colored->points[i].g = 0;
-        cloud_colored->points[i].b = 0;
-        cloud_colored->points[i].a = 255;
+        point_cloud_rgb_ptr->points[i].x = point_cloud_ptr->points[i].x;
+        point_cloud_rgb_ptr->points[i].y = point_cloud_ptr->points[i].y;
+        point_cloud_rgb_ptr->points[i].z = point_cloud_ptr->points[i].z;
+        point_cloud_rgb_ptr->points[i].r = 255;
+        point_cloud_rgb_ptr->points[i].g = 0;
+        point_cloud_rgb_ptr->points[i].b = 0;
     }
-    visualizer.setPointCloudRenderingProperties ( visualization::PCL_VISUALIZER_POINT_SIZE, 5 );
+}
 
-    viewer.showCloud ( cloud_colored );
-    while( !viewer.wasStopped() )
+void init_visualizer( visualization::PCLVisualizer &visualizer, const PointCloud<PointXYZRGB>::Ptr &rgb_cloud_ptr )
+{
+    visualizer.setBackgroundColor( 0, 0, 0 );
+    visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb( rgb_cloud_ptr );
+    visualizer.addPointCloud<PointXYZRGB> ( rgb_cloud_ptr, rgb, "cloud");
+    visualizer.addCoordinateSystem( 1.0 );
+    visualizer.setPointCloudRenderingProperties ( visualization::PCL_VISUALIZER_POINT_SIZE, 3, "cloud" );
+    visualizer.initCameraParameters();
+}
+
+void plane_extraction( const PointCloud<PointXYZRGB>::Ptr &rgb_cloud_ptr )
+{
+    LidarPlaneExtractor plane_extractor( rgb_cloud_ptr );
+
+    plane_extractor.putPointsInCells();
+
+    plane_extractor.find_ground_plane_in_each_cell();
+
+    plane_extractor.labelGroundAndNonGroundPoints();
+}
+
+void print_cloud_rgb( const PointCloud<PointXYZRGB>::Ptr &rgb_cloud_ptr )
+{
+    for( const auto & point : rgb_cloud_ptr->points )
     {
-
+        cout << "x = " << point.x << ", y = " << point.y << ", z = " << point.z << endl;
     }
+}
 
-//    for (const auto & point : cloud->points )
-//    {
-//        std::cout << "    " << point.x
-//                  << " "    << point.y
-//                  << " "    << point.z << std::endl;
-//    }
+int main( int argc, char** argv ) {
+
+    PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ>);
+
+    PointCloud<PointXYZRGB>::Ptr cloud_colored (new PointCloud<PointXYZRGB>);
+
+    if( !load_point_cloud( "test.pcd", cloud ) )
+    {
+        return -1;
+    };
+
+    copy_point_cloud_xyz_to_rgbd( cloud, cloud_colored );
+
+    plane_extraction( cloud_colored );
+
+    print_cloud_rgb( cloud_colored );
+
+    visualization::PCLVisualizer visualizer( "Visualizer" );
+    init_visualizer( visualizer, cloud_colored );
+
+    while( !visualizer.wasStopped() )
+    {
+        visualizer.spinOnce( 100 );
+        boost::this_thread::sleep( boost::posix_time::microseconds (100) );
+    }
 
     return 0;
 }

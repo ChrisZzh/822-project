@@ -19,7 +19,7 @@ class LidarPlaneExtractor {
 protected:
 
     /* pointer to the accumulated point cloud contained in one scan */
-    pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr point_cloud;
 
     vector<vector<size_t>> grid_cell = {};
 
@@ -29,24 +29,31 @@ protected:
 
     size_t num_of_grid_cells = 0;
 
+    size_t num_points_per_scan = 0;
+
     /* labels of the points: ground, plane1, plane2, etc. */
     vector<PointTypes> labels = {};
+
+public:
 
     LidarPlaneExtractor() = default;
 
     ~LidarPlaneExtractor() = default;
 
-    explicit LidarPlaneExtractor(pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud );
+    explicit LidarPlaneExtractor(pcl::PointCloud<pcl::PointXYZRGB>::Ptr point_cloud);
 
     void putPointsInCells();
 
     void find_ground_plane_in_each_cell();
 
+    void labelGroundAndNonGroundPoints();
+
+// helpers
+protected:
     size_t findIndex( double coordinate ) const;
 
     float findGroundHeight( const vector<size_t> & cell );
 
-    void labelGroundAndNonGroundPoints();
 
 };
 
