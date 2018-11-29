@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<package>
+  <name>plane_extraction_tracking</name>
+  <version>0.0.0</version>
+  <description>plane_extraction_tracking package</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag --> 
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="weizhaos@andrew.cmu.edu">Weizhao Shao</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
+
+  <build_depend>visual_frontend</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>opencv2</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>stereo_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>message_filters</build_depend>
+  
+  <run_depend>roscpp</run_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>opencv2</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>stereo_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!--image_transport plugin="${prefix}/resized_plugins.xml"/-->
+  </export>
+</package>
