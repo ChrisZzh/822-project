@@ -20,19 +20,15 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(PCL REQUIRED)
 
 catkin_package(
-  INCLUDE_DIRS include
+  #INCLUDE_DIRS ../include
   CATKIN_DEPENDS message_runtime std_msgs
   DEPENDS PCL
   )
 
-catkin_package(INCLUDE_DIRS include CATKIN_DEPENDS cv_bridge image_transport message_runtime roscpp sensor_msgs stereo_msgs std_msgs)
+catkin_package(CATKIN_DEPENDS cv_bridge image_transport message_runtime roscpp sensor_msgs stereo_msgs std_msgs)
 
 find_package(OpenCV)
 include_directories(/usr/local/include)
-
-find_package(libpointmatcher 1.1.0 REQUIRED)
-include_directories("${libpointmatcher_INCLUDE_DIRS}")
-message(STATUS "Using libpointmatcher version ${libpointmatcher_VERSION}")
 
 include_directories(
   include 
