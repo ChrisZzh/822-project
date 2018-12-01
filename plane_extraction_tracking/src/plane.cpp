@@ -101,7 +101,29 @@ void plane_extraction(cv::Mat& image_1, cv::Mat image_2)
 	// filter out points on the major plane (ground plane)
 
 	// find homography use this set
+	cv::Mat_<double> homo(3,3);
+	cv::Mat_<double> K(3,3);
+	homo << -0.0032, -0.0011, 0.9999, -0.0000, -0.0028, 0.0113, -0.0000, -0.0000, -.0017;
+	K << 498.1357, 0.0, 351.7269, 0.0, 498.1357, 255.9643, 0.0, 0.0, 1;
 
+	cv::Mat homography = K * homo * K.inv();
+	homography /= homography.at<double>(2,2);
+
+    std::vector<cv::Mat> Rs_decomp, ts_decomp, normals_decomp;
+    int solutions = cv::decomposeHomographyMat(homography, K, Rs_decomp, ts_decomp, normals_decomp);
+    std::cout << "Decompose homography matrix computed from the camera displacement:\n\n";
+    for (int i = 0; i < solutions; i++)
+    {
+      //double factor_d1 = 1.0 / d_inv1;
+      cv::Mat rvec_decomp;
+      cv::Rodrigues(Rs_decomp[i], rvec_decomp);
+      std::cout << "Solution " << i << ":" << std::endl;
+      std::cout << "rvec from homography decomposition: " << rvec_decomp.t() << std::endl;
+      std::cout << "tvec from homography decomposition: " << ts_decomp[i].t() << std::endl;;//<< " and scaled by d: " << factor_d1 * ts_decomp[i].t() << std::endl;
+      std::cout << "plane normal from homography decomposition: " << normals_decomp[i].t() << std::endl;
+      //cout << "plane normal at camera 1 pose: " << normal1.t() << endl << endl;
+    }
+	
 	// eigen solver n d
 
 	return;
@@ -113,10 +135,10 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "plane");
     ros::NodeHandle nh("~");
 
-    std::string image_path_1("/home/wz/Desktop/822/822_test/images/right_0_1528404291835066602.jpg");
+    std::string image_path_1("/home/wz/Desktop/822_test/images/right_0_1528404291835066602.jpg");
     cv::Mat image_1 = cv::imread(image_path_1, CV_LOAD_IMAGE_COLOR);   // assume BGR now. Make sure RGB or BGR
 
-    std::string image_path_2("/home/wz/Desktop/822/822_test/images/right_1_1528404291885616260.jpg");
+    std::string image_path_2("/home/wz/Desktop/822_test/images/right_1_1528404291885616260.jpg");
     cv::Mat image_2 = cv::imread(image_path_2, CV_LOAD_IMAGE_COLOR);   // assume BGR now. Make sure RGB or BGR
 
     plane_extraction(image_1, image_2);
