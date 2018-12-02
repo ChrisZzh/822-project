@@ -4,7 +4,7 @@
 % estimate homography, estimate n and d
 %
 %
-function [f_sel, d_sel] = HSV_extraction(img_1, k)
+function [f_sel, d_sel, idx1_v_visualize] = HSV_extraction(img_1, k)
 %% convert to HSV
 img_1_hsv = rgb2hsv(img_1);
 
@@ -31,9 +31,9 @@ end
 idx1_v_visualize = idx1_v;
 idx1_v_visualize(idx1_v_visualize ~= dom_idx) = 0;
 idx1_v_visualize = uint8(floor(idx1_v_visualize * 255));
-figure
-imshow(idx1_v_visualize)
-title('value k-means')
+% figure
+% imshow(idx1_v_visualize)
+% title('value k-means')
 
 %% do feature work
 [f,d] = vl_sift(single(rgb2gray(img_1)));

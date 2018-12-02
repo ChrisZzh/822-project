@@ -48,4 +48,6 @@ p1Gen = p1Gen./p1Gen(3,:); % normalization
 p1Gen = p1Gen(1:2,:); % extract Cartisan Coordinate
 TotErr = (p1Gen(1,:)-p1(1,:)).^2+(p1Gen(2,:)-p1(2,:)).^2;
 index = find(TotErr<tol);
+
+bestH = bestH/bestH(3,3);
 end
