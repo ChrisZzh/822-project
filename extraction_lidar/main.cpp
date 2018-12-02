@@ -12,8 +12,12 @@
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
-using namespace pcl;
+// OpenCV supports
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
+using namespace pcl;
+using namespace cv;
 using namespace std;
 
 bool load_point_cloud( const string & filename, const PointCloud<PointXYZ>::Ptr &point_cloud_pointer )
@@ -56,15 +60,13 @@ void init_visualizer( visualization::PCLVisualizer &visualizer, const PointCloud
     visualizer.initCameraParameters();
 }
 
-void plane_extraction( const PointCloud<PointXYZRGB>::Ptr &rgb_cloud_ptr )
+void plane_extraction( const PointCloud<PointXYZRGB>::Ptr &rgb_cloud_ptr, LidarPlaneExtractor &plane_extractor )
 {
-    LidarPlaneExtractor plane_extractor( rgb_cloud_ptr );
-
     plane_extractor.putPointsInCells();
-
     plane_extractor.find_ground_plane_in_each_cell();
-
     plane_extractor.labelGroundAndNonGroundPoints();
+    plane_extractor.computePlaneParameters();
+    plane_extractor.findPlaneInImage();
 }
 
 void print_cloud_rgb( const PointCloud<PointXYZRGB>::Ptr &rgb_cloud_ptr )
@@ -72,6 +74,25 @@ void print_cloud_rgb( const PointCloud<PointXYZRGB>::Ptr &rgb_cloud_ptr )
     for( const auto & point : rgb_cloud_ptr->points )
     {
         cout << "x = " << point.x << ", y = " << point.y << ", z = " << point.z << endl;
+    }
+}
+
+void labelGround(Mat &image, const MatrixXd &ground_pixel_indices) {
+    Size s = image.size();
+    for (size_t row = 0; row < ground_pixel_indices.rows(); row++) {
+        if (ground_pixel_indices(row, 0) < 0.f || ground_pixel_indices(row, 1) < 0.f) {
+            continue;
+        } else {
+            auto j = static_cast<size_t>(floor(ground_pixel_indices(row, 0)));
+            auto i = static_cast<size_t>(floor(ground_pixel_indices(row, 1)));
+            if (i > s.width || j > s.height) {
+                continue;
+            }
+            image.at<Vec3b>(i, j)[0] = 0;
+            image.at<Vec3b>(i, j)[1] = 0;
+            image.at<Vec3b>(i, j)[2] = 255;
+            cout << "ground labled." << endl;
+        }
     }
 }
 
@@ -93,21 +114,35 @@ int main( int argc, char** argv ) {
 
     copy_point_cloud_xyz_to_rgbd( cloud, cloud_colored );
 
-    plane_extraction( cloud_colored );
+    LidarPlaneExtractor plane_extractor( cloud_colored );
+
+    plane_extraction( cloud_colored, plane_extractor );
 
     duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 
     cout << "Loading and processing one scan consumes: " << duration << " secs." << endl;
 //    print_cloud_rgb( cloud_colored );
 
-    visualization::PCLVisualizer visualizer( "Visualizer" );
-    init_visualizer( visualizer, cloud_colored );
 
-    while( !visualizer.wasStopped() )
-    {
-        visualizer.spinOnce( 100 );
-        boost::this_thread::sleep( boost::posix_time::microseconds (100) );
+//    visualization::PCLVisualizer visualizer( "Visualizer" );
+//    init_visualizer( visualizer, cloud_colored );
+//
+//    while( !visualizer.wasStopped() )
+//    {
+//        visualizer.spinOnce( 100 );
+//        boost::this_thread::sleep( boost::posix_time::microseconds (100) );
+//    }
+
+    Mat image;
+    image = imread("../data/images/left_67_1528404295187234419.jpg", CV_LOAD_IMAGE_COLOR);
+    if (!image.data) {
+        cout <<  "Could not open or find the image" << std::endl ;
+        return -1;
     }
+    labelGround(image, plane_extractor.getGroundPointsPixelLocation());
+    namedWindow( "Image", WINDOW_AUTOSIZE );
+    imshow( "Image", image );
 
+    waitKey(0);
     return 0;
 }

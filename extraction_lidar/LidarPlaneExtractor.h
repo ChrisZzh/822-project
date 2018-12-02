@@ -34,6 +34,16 @@ protected:
     /* labels of the points: ground, plane1, plane2, etc. */
     vector<PointTypes> labels = {};
 
+    PlaneInfo ground = {};
+
+    MatrixXd ground_points_lidar = {};
+
+    MatrixXd ground_points_camera = {};
+
+    MatrixXd ground_points_pixel_location = {};
+
+    MatrixXd mean = {};
+
 public:
 
     LidarPlaneExtractor() = default;
@@ -48,13 +58,27 @@ public:
 
     void labelGroundAndNonGroundPoints();
 
+    void computePlaneParameters();
+
+    void findPlaneInImage();
+
+    const MatrixXd &getGroundPointsPixelLocation() const { return ground_points_pixel_location; };
+
 // helpers
 protected:
     size_t findIndex( double coordinate ) const;
 
-    float findGroundHeight( const vector<size_t> & cell );
+    float findGroundHeight( const vector<size_t> & cell ) const;
 
+    void updatePlaneInfo(const JacobiSVD<MatrixXd> &svd);
 
+    void transformGroundPointsLtoC();
+
+    MatrixXd assembleTransformation(const Quaterniond &q, const Translation3d &t) const;
+
+    void cameraProjection();
+
+    MatrixXd assembleCameraIntrinsic() const;
 };
 
 
