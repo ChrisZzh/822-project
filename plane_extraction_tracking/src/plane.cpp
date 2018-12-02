@@ -7,8 +7,13 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/tracking.hpp>
 #include <opencv2/core/ocl.hpp>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 #include <iostream>
+
+typedef pcl::PointCloud< pcl::PointXYZI > PointCloudI;
 
 cv::Scalar colorTab[] =
 {
@@ -129,18 +134,30 @@ void plane_extraction(cv::Mat& image_1, cv::Mat image_2)
 	return;
 }
 
+void camBased_callback(const sensor_msgs::Image::ConstPtr &img_msg_L,
+                                        const sensor_msgs::Image::ConstPtr &img_msg_R,
+                                        const nav_msgs::Odometry::ConstPtr &odom_msg) {}
 // main
 int main(int argc, char **argv) 
 {
     ros::init(argc, argv, "plane");
     ros::NodeHandle nh("~");
 
-    std::string image_path_1("/home/wz/Desktop/822_test/images/right_0_1528404291835066602.jpg");
-    cv::Mat image_1 = cv::imread(image_path_1, CV_LOAD_IMAGE_COLOR);   // assume BGR now. Make sure RGB or BGR
+    img_sub.subscribe(nh, "/mapping/left/image_rect_color", 100);
+    odom_sub.subscribe(nh, "/smart_smoother/odom_camera", 100);
+    point_cloud_sub.subscribe(nh,"/feature_points", 10);
+    
+    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, nav_msgs::Odometry, PointCloudI> sync_pol;
+    message_filters::Synchronizer<sync_pol> sync(sync_pol(100), img_sub_L, img_sub_R, odom_sub);
+    sync.registerCallback(boost::bind(&camBased_callback, this, _1, _2, _3));
 
-    std::string image_path_2("/home/wz/Desktop/822_test/images/right_1_1528404291885616260.jpg");
-    cv::Mat image_2 = cv::imread(image_path_2, CV_LOAD_IMAGE_COLOR);   // assume BGR now. Make sure RGB or BGR
 
-    plane_extraction(image_1, image_2);
+    // std::string image_path_1("/home/wz/Desktop/822_test/images/right_0_1528404291835066602.jpg");
+    // cv::Mat image_1 = cv::imread(image_path_1, CV_LOAD_IMAGE_COLOR);   // assume BGR now. Make sure RGB or BGR
+
+    // std::string image_path_2("/home/wz/Desktop/822_test/images/right_1_1528404291885616260.jpg");
+    // cv::Mat image_2 = cv::imread(image_path_2, CV_LOAD_IMAGE_COLOR);   // assume BGR now. Make sure RGB or BGR
+
+    // plane_extraction(image_1, image_2);
     return 0;
 }
