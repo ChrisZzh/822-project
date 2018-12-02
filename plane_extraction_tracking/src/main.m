@@ -56,13 +56,11 @@ delta_T = inv(T_C2)*T_C1;
 
 K = [498.1357145, 0, 351.726944;0,498.1357145,255.9642885;0,0,1];
 %% Compute n d
-R = delta_T(1:3,1:3);
-t = delta_T(1:3,4);
-
-%[n, d, lambda] = computeP(bestH, K, R, t);
-x = computeP(bestH, K, R, t);
-
-% T_C2*[n;0]
+% R = delta_T(1:3,1:3);
+% t = delta_T(1:3,4);
+% 
+% [n, d, lambda] = computeP(bestH, K, R, t);
+%x = computeP(bestH/bestH(3,3), K, R, t);
 
 %syms lambda n1 n2 n3 d real
 %[l,n1_,n2_,n3_,d_, val_] = fmincon(fun,[l_0,n1_0,n2_0,n3_0,d_0],A=[],b=[],Aeq=[],Beq=[],lb=[],ub=[],ceq);
@@ -74,12 +72,6 @@ n1_0 = -0.924;
 n2_0 = -0.017;
 n3_0 = 0.3817;
 d_0 = 1/10.7258;
-
-
-0.0058
-1.5883
-0.8470
-     0
 
 
 
