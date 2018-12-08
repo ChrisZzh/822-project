@@ -140,6 +140,9 @@
 // 	return;
 // }
 
+void camBased_callback(const sensor_msgs::Image::ConstPtr &img_msg_L,
+                                        const sensor_msgs::Image::ConstPtr &img_msg_R,
+                                        const nav_msgs::Odometry::ConstPtr &odom_msg) {}
 // main
 int main(int argc, char **argv) 
 {
