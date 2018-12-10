@@ -82,7 +82,7 @@ float LidarPlaneExtractor::findGroundHeight(const vector<size_t> &cell) const{
     }
     if( !found )
     {
-        cerr << "LidarPlaneExtractor::findGroundHeight: not found." << endl;
+        // cerr << "LidarPlaneExtractor::findGroundHeight: not found." << endl;
     }
     return min_ground_height;
 }
@@ -95,6 +95,9 @@ void LidarPlaneExtractor::labelGroundAndNonGroundPoints() {
     for( size_t i = 0; i < num_of_grid_cells; i++ )
     {
         auto ground_height = ground_height_of_each_cell[i];
+        if (fabs(ground_height - (-1.3f)) <= 0.0001f) {
+            continue; 
+        }
         for( auto & point_index : grid_cell[i] )
         {
             if( point_cloud->points[point_index].z > ground_height + GROUND_REGION_HEIGHT )
@@ -164,7 +167,8 @@ MatrixXd LidarPlaneExtractor::assembleTransformation(const Quaterniond &q, const
     return T;
 }
 
-void LidarPlaneExtractor::findPlaneInImage() {
+void LidarPlaneExtractor::findPlaneInImage(const Matrix4d &transformation_matrix) {
+    T_I_W = transformation_matrix; 
     transformGroundPointsLtoC();
     cameraProjection();
 }
@@ -175,64 +179,7 @@ void LidarPlaneExtractor::transformGroundPointsLtoC() {
     Translation3d t_I_C(Vector3d(-0.13537f, -0.11358f, 0.015839f));
     auto T_C_I = assembleTransformation(q_I_C, t_I_C);
 
-//    // extrinsic matrices from IMU to camera world
-//    Quaterniond q_I_O_camera(0.97379249941246470712f, 0.016494677694310656835f, -0.22574939817782699314f, 0.022210423637006669606f);
-//    Translation3d t_I_O_camera(Vector3d(-0.44890212813470076192f, 0.03871945017262484745f, -0.0081686908410265879343f));
-//    auto T_I_O_cam = assembleTransformation(q_I_O_camera, t_I_O_camera);
-//
-//    // extrinsic matrices from IMU to LiDAR world
-//    Quaterniond q_I_O_lidar(0.973729454714922f, 0.01769039122573788f, -0.2261052466702405f, 0.02035722247878263f);
-//    Translation3d t_I_O_lidar(Vector3d(-0.4502058634836024f, 0.02398935409709984f, -0.00151897710861594f));
-//    auto T_I_O_lidar = assembleTransformation(q_I_O_lidar, t_I_O_lidar);
-
-    // extrinsic matrices from IMU to camera world
-    Quaterniond q_I_O_camera(0.97399948023159754751f, 0.0060250375937415927979f, -0.22577667468113121751f, -0.017708884789934188631f);
-    Translation3d t_I_O_camera(Vector3d(-3.1387316334198058776f, 0.26906105374385391737f, 0.0069626112659987851247f));
-    auto T_I_O_cam = assembleTransformation(q_I_O_camera, t_I_O_camera);
-
-    // extrinsic matrices from IMU to LiDAR world
-    Quaterniond q_I_O_lidar(0.9742605554849183f, 0.008888275035702423f, -0.2247186173041979f, -0.01545676647937188f);
-    Translation3d t_I_O_lidar(Vector3d(-3.266430592029979f, 0.2188575629109428f, 0.02326167409746047f));
-    auto T_I_O_lidar = assembleTransformation(q_I_O_lidar, t_I_O_lidar);
-
-//    // extrinsic matrices from IMU to camera world
-//    Quaterniond q_I_O_camera(0.78995810436514446451f, 0.13836578452231249048f, -0.18253557440092629816f, 0.56877224536670167865f);
-//    Translation3d t_I_O_camera(Vector3d(-10.239143036573635115f, 0.87149041046356989781f, -0.022001021595639710243f));
-//    auto T_I_O_cam = assembleTransformation(q_I_O_camera, t_I_O_camera);
-//
-//    // extrinsic matrices from IMU to LiDAR world
-//    Quaterniond q_I_O_lidar(0.7960698900379954f, 0.1364074164281219f, -0.1812260756921947f, 0.5610907737679401f);
-//    Translation3d t_I_O_lidar(Vector3d(-10.31616196497376f, 0.733600654462199f, 0.0540135676578862f));
-//    auto T_I_O_lidar = assembleTransformation(q_I_O_lidar, t_I_O_lidar);
-
-//    // extrinsic matrices from IMU to camera world
-//    Quaterniond q_I_O_camera(0.78693478681640960382f, 0.14014795846479677355f, -0.18097161553942892054f, 0.57301087721387211626f);
-//    Translation3d t_I_O_camera(Vector3d(-3.6365926623709867727f, -0.50092593699118237449f, -0.016328461018303045554f));
-//    auto T_I_O_cam = assembleTransformation(q_I_O_camera, t_I_O_camera);
-//
-//    // extrinsic matrices from IMU to LiDAR world
-//    Quaterniond q_I_O_lidar(0.7980270657340848f, 0.1392954775680357f, -0.1836968017901212f, 0.5567809778512737f);
-//    Translation3d t_I_O_lidar(Vector3d(-3.708476202021089f, -0.5381995096949547f, 0.03146552372088337f));
-//    auto T_I_O_lidar = assembleTransformation(q_I_O_lidar, t_I_O_lidar);
-
-//    // extrinsic matrices from IMU to camera world
-//    Quaterniond q_I_O_camera(0.9059524645188308245f, -0.076457688329491638179f, -0.22443160123385019755f, -0.35076318263919575857f);
-//    Translation3d t_I_O_camera(Vector3d(-21.114414690557083532f, -3.9903353270451700219f, -0.091603466765364877089f));
-//    auto T_I_O_cam = assembleTransformation(q_I_O_camera, t_I_O_camera);
-//
-//    // extrinsic matrices from IMU to LiDAR world
-//    Quaterniond q_I_O_lidar(0.9026178872343066f, -0.07888020917187256f, -0.2065189910426705f, -0.3693355771982921f);
-//    Translation3d t_I_O_lidar(Vector3d(-20.87744519129228f, -4.438633356847971f, 0.1682614346989345f));
-//    auto T_I_O_lidar = assembleTransformation(q_I_O_lidar, t_I_O_lidar);
-
-    // extrinsic matrix from IMU to LiDAR
-    MatrixXd T_from_lidar_to_IMU(4,4);
-    T_from_lidar_to_IMU << 0.f, -1.f, 0.f, -0.028030000000000f,
-            1.f,  0.f, 0.f,  0.034960000000000f,
-            0.f,  0.f, 1.f, -0.087869000000000f,
-            0.f,  0.f, 0.f, 1.f;
-
-    auto T_C_O = T_I_O_cam * T_C_I;
+    auto T_C_O = T_I_W * T_C_I;
 //    auto transformationFromLidarToCamera = T_C_I.inverse() * T_I_O_cam;
 //    cout << T_C_O << endl;
 

@@ -6,8 +6,8 @@
 #include <opencv2/highgui/highgui.hpp>
 
 // lidar plane extractor  
-#include "LidarPlaneExtractor.h"
-#include "DataStructures.h"
+#include "../include/LidarPlaneExtractor.h"
+#include "../include/DataStructures.h"
 
 // Point Cloud Library (PCL) 
 #include <pcl/io/pcd_io.h>
@@ -191,7 +191,7 @@ void plane_extraction( const PointCloud<PointXYZRGB>::Ptr &rgb_cloud_ptr, LidarP
     plane_extractor.labelGroundAndNonGroundPoints();
     plane_extractor.computePlaneParameters();
     plane_extractor.findPlaneInImage();
-}
+}   
 
 void print_cloud_rgb( const PointCloud<PointXYZRGB>::Ptr &rgb_cloud_ptr )
 {
@@ -223,9 +223,10 @@ void labelGround(Mat &image, const MatrixXd &ground_pixel_indices) {
     }
 }
 
-void camBased_callback(const sensor_msgs::Image::ConstPtr &img_msg_L,
-                                        const sensor_msgs::Image::ConstPtr &img_msg_R,
-                                        const nav_msgs::Odometry::ConstPtr &odom_msg) {}
+void camBased_callback(const sensor_msgs::Image::ConstPtr &img_msg_L, const nav_msgs::Odometry::ConstPtr &odom_msg) {}
+
+
+
 // main
 int main(int argc, char **argv) 
 {

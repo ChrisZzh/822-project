@@ -20,7 +20,6 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(PCL REQUIRED)
 
 catkin_package(
-  #INCLUDE_DIRS ../include
   CATKIN_DEPENDS message_runtime std_msgs
   DEPENDS PCL
   )
@@ -40,9 +39,11 @@ link_directories(/usr/local/lib)
 
 find_package(Boost REQUIRED COMPONENTS system)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${CERES_INCLUDE_DIRS}  ${EIGEN3_INCLUDE_DIR})
+add_executable(plane_extraction_tracking src/plane.cpp src/LidarPlaneExtractor.cpp)
 
-add_executable(plane_extraction_tracking src/plane.cpp)
+#add_library(lidar include/DataStructures.h)
+
+#add_library(lidar_2 include/LidarPlaneExtractor.h)
 
 add_dependencies(plane_extraction_tracking ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
-target_link_libraries(plane_extraction_tracking ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${libpointmatcher_LIBRARIES})
+target_link_libraries(plane_extraction_tracking ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
